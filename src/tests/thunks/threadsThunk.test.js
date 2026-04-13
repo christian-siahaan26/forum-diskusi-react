@@ -1,9 +1,7 @@
-// src/tests/thunks/threadsThunk.test.js
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { fetchThreads, upVoteThread } from '../../store/slices/threadsSlice';
-// Sesuaikan path import ini jika berbeda
 import * as threadsApi from '../../api/threadsApi';
 
 vi.mock('../../api/threadsApi');
@@ -15,10 +13,10 @@ describe('threadsSlice thunks', () => {
   beforeEach(() => {
     dispatch = vi.fn();
 
-    // MOCK STATE: Pastikan state selengkap mungkin agar thunk tidak error di tengah jalan
+    // MOCK STATE
     getState = vi.fn().mockReturnValue({
       auth: {
-        authUser: { id: 'user-1' }, // Berjaga-jaga jika thunk butuh authUser
+        authUser: { id: 'user-1' },
       },
       threads: {
         threads: [
@@ -33,7 +31,7 @@ describe('threadsSlice thunks', () => {
     vi.clearAllMocks();
   });
 
-  // ── 1. Uji fetchThreads ──────────────────────────────────────────────────
+  // Uji fetchThreads
   describe('fetchThreads thunk', () => {
     it('should dispatch pending and fulfilled when API call succeeds', async () => {
       // Arrange
@@ -70,16 +68,14 @@ describe('threadsSlice thunks', () => {
     });
   });
 
-  // ── 2. Uji upVoteThread ──────────────────────────────────────────────────
+  // Uji upVoteThread
   describe('upVoteThread thunk', () => {
     it('should dispatch pending and fulfilled when API call succeeds', async () => {
-      // Arrange (Mock keduanya agar aman jika ada logika toggle neutral)
       threadsApi.upVoteThreadApi.mockResolvedValue({ status: 'success' });
       threadsApi.neutralVoteThreadApi.mockResolvedValue({ status: 'success' });
 
       // Act
       const action = upVoteThread({ threadId: 'thread-1', userId: 'user-1' });
-      // rejectWithValue kita mock karena thunk mungkin memanggilnya saat error
       await action(dispatch, getState, { rejectWithValue: vi.fn() });
 
       // Assert

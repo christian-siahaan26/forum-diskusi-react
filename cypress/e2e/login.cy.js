@@ -1,12 +1,3 @@
-// cypress/e2e/login.cy.js
-
-// ─────────────────────────────────────────────────────────────────────────────
-// KONSTANTA
-//
-// Selectors disimpan di satu tempat agar mudah diupdate jika markup berubah.
-// Hindari hardcode selector yang sama di banyak tempat.
-// ─────────────────────────────────────────────────────────────────────────────
-
 const SEL = {
   emailInput: '#login-email',
   passwordInput: '#login-password',
@@ -18,22 +9,17 @@ const SEL = {
 const VALID_EMAIL = Cypress.env('email');
 const VALID_PASSWORD = Cypress.env('password');
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TEST SUITE
-// ─────────────────────────────────────────────────────────────────────────────
-
 describe('Login Page — E2E', () => {
-  // Jalankan sebelum setiap test: buka halaman login dari kondisi bersih
   beforeEach(() => {
     cy.clearAuth();
     cy.visit('/login');
   });
 
-  // ── Skenario 1: Tampilan Halaman Login ──────────────────────────────────────
+  // Skenario 1: Halaman Login
 
   describe('Halaman login ditampilkan dengan benar', () => {
     it('harus menampilkan judul halaman, input email, input password, dan tombol submit', () => {
-      // Assert — semua elemen wajib ada di halaman
+      // Assert
       cy.contains('h1', /selamat datang/i)
         .should('be.visible');
 
@@ -64,17 +50,16 @@ describe('Login Page — E2E', () => {
     });
 
     it('harus menampilkan error validasi jika form disubmit kosong', () => {
-      // Act — klik submit tanpa isi apapun
+      // Act
       cy.get(SEL.submitButton).click();
 
-      // Assert — pesan validasi lokal harus muncul
+      // Assert
       cy.contains(/email tidak boleh kosong/i)
         .should('be.visible');
 
       cy.contains(/password tidak boleh kosong/i)
         .should('be.visible');
 
-      // URL tidak berubah — masih di halaman login
       cy.url().should('include', '/login');
     });
 
@@ -90,11 +75,10 @@ describe('Login Page — E2E', () => {
     });
   });
 
-  // ── Skenario 2: Login Gagal ──────────────────────────────────────────────────
-
+  // Skenario 2: Login Gagal
   describe('Login gagal — menampilkan pesan error dari API', () => {
     it('harus menampilkan banner error saat password salah', () => {
-      // Act — email benar tapi password sengaja salah
+      // Act
       cy.get(SEL.emailInput)
         .type(VALID_EMAIL);
 
@@ -103,12 +87,11 @@ describe('Login Page — E2E', () => {
 
       cy.get(SEL.submitButton).click();
 
-      // Assert — tunggu respons API lalu cek banner error
+      // Assert
       cy.get(SEL.alertBanner, { timeout: 10000 })
         .should('be.visible')
         .and('not.be.empty');
 
-      // URL tidak berpindah dari halaman login
       cy.url().should('include', '/login');
     });
 
@@ -135,23 +118,22 @@ describe('Login Page — E2E', () => {
       cy.get(SEL.passwordInput).type('salahpassword');
       cy.get(SEL.submitButton).click();
 
-      // Assert — URL tetap /login
+      // Assert
       cy.url({ timeout: 10000 }).should('include', '/login');
 
-      // Form masih ada — user bisa coba lagi
       cy.get(SEL.emailInput).should('be.visible');
       cy.get(SEL.passwordInput).should('be.visible');
     });
   });
 
-  // ── Skenario 3: Login Berhasil ───────────────────────────────────────────────
+  // Skenario 3: Login Berhasil
 
   describe('Login berhasil — user diarahkan ke homepage', () => {
     it('harus redirect ke homepage setelah login dengan kredensial yang valid', () => {
-      // Intercept untuk memverifikasi API dipanggil dengan benar
+      // Intercept
       cy.intercept('POST', '**/login').as('loginRequest');
 
-      // Act — isi form dengan kredensial valid
+      // Act
       cy.get(SEL.emailInput)
         .type(VALID_EMAIL);
 
@@ -160,7 +142,7 @@ describe('Login Page — E2E', () => {
 
       cy.get(SEL.submitButton).click();
 
-      // Assert 1: request ke API terjadi
+      // Assert 1: request ke API
       cy.wait('@loginRequest').then(({ response }) => {
         expect(response.statusCode).to.eq(200);
         expect(response.body.data).to.have.property('token');
@@ -177,7 +159,7 @@ describe('Login Page — E2E', () => {
       cy.get(SEL.passwordInput).type(VALID_PASSWORD);
       cy.get(SEL.submitButton).click();
 
-      // Assert — token harus ada di localStorage
+      // Assert
       cy.url({ timeout: 10000 }).should('not.include', '/login');
 
       cy.window().then((win) => {
@@ -193,23 +175,21 @@ describe('Login Page — E2E', () => {
       cy.get(SEL.passwordInput).type(VALID_PASSWORD);
       cy.get(SEL.submitButton).click();
 
-      // Assert — tunggu redirect, lalu cek navbar
+      // Assert
       cy.url({ timeout: 10000 }).should('not.include', '/login');
 
-      // Navbar harus menampilkan info user (nama atau avatar)
       cy.get(SEL.navbar)
         .should('be.visible')
-        .and('not.contain.text', 'Masuk'); // tombol login tidak ada lagi
+        .and('not.contain.text', 'Masuk');
     });
 
     it('harus redirect langsung ke homepage jika user sudah login saat mengunjungi /login', () => {
-      // Arrange — login via API langsung (bypass UI)
       cy.login();
 
-      // Act — coba buka halaman login padahal sudah punya token
+      // Act
       cy.visit('/login');
 
-      // Assert — harus langsung redirect ke homepage
+      // Assert
       cy.url({ timeout: 10000 })
         .should('eq', `${Cypress.config('baseUrl')}/`);
     });
@@ -220,16 +200,16 @@ describe('Login Page — E2E', () => {
       cy.get(SEL.passwordInput).type(VALID_PASSWORD);
       cy.get(SEL.submitButton).click();
 
-      // Assert — homepage memuat thread
+      // Assert
       cy.url({ timeout: 10000 }).should('not.include', '/login');
 
-      // Tunggu thread list muncul (bukan loading spinner)
+      // Tunggu
       cy.get('article', { timeout: 15000 })
         .should('have.length.greaterThan', 0);
     });
   });
 
-  // ── Skenario 4: Navigasi dari halaman login ──────────────────────────────────
+  // Skenario 4: Navigasi dari halaman login
 
   describe('Navigasi dari halaman login', () => {
     it('harus berpindah ke halaman Register saat link register diklik', () => {
@@ -239,7 +219,6 @@ describe('Login Page — E2E', () => {
       // Assert
       cy.url().should('include', '/register');
 
-      // Halaman register harus tampil
       cy.contains('h1', /buat akun baru/i)
         .should('be.visible');
     });

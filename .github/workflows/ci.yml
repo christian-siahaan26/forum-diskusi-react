@@ -1,6 +1,5 @@
 name: Continuous Integration
 
-# CI akan berjalan setiap kali ada push atau pull request ke branch main/master
 on:
   push:
     branches:
@@ -17,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x] # Menggunakan Node.js versi stabil
+        node-version: [20.x]
 
     steps:
       - name: Checkout repository
