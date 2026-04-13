@@ -18,7 +18,6 @@ module.exports = {
     'airbnb',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
-    'plugin:cypress/recommended',
   ],
 
   parserOptions: {
