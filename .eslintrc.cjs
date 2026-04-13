@@ -11,6 +11,10 @@ module.exports = {
   globals: {
     cy: 'readonly',
     Cypress: 'readonly',
+    describe: 'readonly',
+    it: 'readonly',
+    beforeEach: 'readonly',
+    expect: 'readonly',
   },
 
   extends: [
