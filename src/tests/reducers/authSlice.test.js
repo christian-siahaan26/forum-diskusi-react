@@ -53,7 +53,7 @@ describe('authSlice reducer', () => {
       // Assert
       // token bisa berisi nilai dari localStorage jika ada — normalkan dulu
       expect(state.authUser).toBeNull();
-      expect(state.status).toBe('sengaja_disalahkan');
+      expect(state.status).toBe('idle');
       expect(state.error).toBeNull();
     });
   });
