@@ -40,53 +40,45 @@ const getNextVoteType = (currentVote, clickedVote) => {
 };
 
 export const upVoteThread = createAsyncThunk(
-  'threads/upVoteThread',
+  'threads/upVote',
   async ({ threadId, userId }, { getState, rejectWithValue }) => {
-    const thread = getState().threads.threads.find((t) => t.id === threadId);
+    const { threads } = getState().threads;
+    const thread = threads.find((t) => t.id === threadId);
 
-    let previousVoteStatus = 'neutral';
-    if (thread?.upVotesBy.includes(userId)) {
-      previousVoteStatus = 'up';
-    } else if (thread?.downVotesBy.includes(userId)) {
-      previousVoteStatus = 'down';
-    }
+    const isAlreadyUpVoted = thread.upVotesBy.includes(userId);
 
     try {
-      const nextVote = getNextVoteType(previousVoteStatus, 'up');
-      if (nextVote === 'neutral') {
+      if (isAlreadyUpVoted) {
         await neutralVoteThreadApi(threadId);
       } else {
         await upVoteThreadApi(threadId);
       }
-      return { threadId, userId, nextVote };
+
+      return { threadId, userId };
     } catch (error) {
-      return rejectWithValue({ threadId, userId, previousVoteStatus });
+      return rejectWithValue({ threadId, userId, error: error.message });
     }
   },
 );
 
 export const downVoteThread = createAsyncThunk(
-  'threads/downVoteThread',
+  'threads/downVote',
   async ({ threadId, userId }, { getState, rejectWithValue }) => {
-    const thread = getState().threads.threads.find((t) => t.id === threadId);
+    const { threads } = getState().threads;
+    const thread = threads.find((t) => t.id === threadId);
 
-    let previousVoteStatus = 'neutral';
-    if (thread?.upVotesBy.includes(userId)) {
-      previousVoteStatus = 'up';
-    } else if (thread?.downVotesBy.includes(userId)) {
-      previousVoteStatus = 'down';
-    }
+    const isAlreadyDownVoted = thread.downVotesBy.includes(userId);
 
     try {
-      const nextVote = getNextVoteType(previousVoteStatus, 'down');
-      if (nextVote === 'neutral') {
+      if (isAlreadyDownVoted) {
         await neutralVoteThreadApi(threadId);
       } else {
         await downVoteThreadApi(threadId);
       }
-      return { threadId, userId, nextVote };
+
+      return { threadId, userId };
     } catch (error) {
-      return rejectWithValue({ threadId, userId, previousVoteStatus });
+      return rejectWithValue({ threadId, userId, error: error.message });
     }
   },
 );
