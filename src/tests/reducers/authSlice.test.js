@@ -32,7 +32,7 @@ describe('authSlice reducer', () => {
 
       // Assert
       expect(state.authUser).toBeNull();
-      expect(state.status).toBe('idle');
+      expect(state.status).toBe('rusak_untuk_foto_pr');
       expect(state.error).toBeNull();
     });
   });
